@@ -1,42 +1,38 @@
 // src/app/services/place.service.ts
-import { Injectable, signal } from '@angular/core';
-import { Place, PlaceCategory } from '../models/place.model';
+import { Injectable, computed, signal } from '@angular/core';
 import { MOCK_PLACES } from '../data/mock-places';
+import { Place, PlaceCategory } from '../models/place.model';
 
-@Injectable({
-  providedIn: 'root',
-})
+@Injectable({ providedIn: 'root' })
 export class PlaceService {
-  // stato centrale della lista
   private placesSignal = signal<Place[]>(MOCK_PLACES);
 
-  /**
-   * Restituisce i posti filtrati per categoria e query di ricerca.
-   */
-  getPlaces(category?: PlaceCategory, query: string = ''): Place[] {
-    const q = query.trim().toLowerCase();
+  // Se ti serve in futuro come stream globale
+  places = computed(() => this.placesSignal());
+
+  getPlaces(
+    category?: PlaceCategory,
+    search: string = ''
+  ): Place[] {
+    const term = search.trim().toLowerCase();
 
     return this.placesSignal().filter((p) => {
-      const matchCategory = category ? p.category === category : true;
+      if (category && p.category !== category) return false;
 
-      const haystack = [
-        p.name,
-        p.neighborhood,
-        p.description,
-        ...(p.tags ?? []),
-      ]
-        .join(' ')
-        .toLowerCase();
+      if (!term) return true;
 
-      const matchQuery = q ? haystack.includes(q) : true;
+      const inText =
+        p.name.toLowerCase().includes(term) ||
+        p.neighborhood.toLowerCase().includes(term) ||
+        p.description.toLowerCase().includes(term) ||
+        p.tags?.some((t) => t.toLowerCase().includes(term));
 
-      return matchCategory && matchQuery;
+      return inText;
     });
   }
 
-  /**
-   * Inverte lo stato "favorite" di un posto.
-   */
+  // --- Preferiti (già sfrutti la proprietà .favorite sugli oggetti) ---
+
   toggleFavorite(id: number): void {
     this.placesSignal.update((list) =>
       list.map((p) =>
@@ -45,16 +41,12 @@ export class PlaceService {
     );
   }
 
-  /**
-   * Tutti i posti marcati come preferiti.
-   */
   getFavorites(): Place[] {
     return this.placesSignal().filter((p) => p.favorite);
   }
 
-  /**
-   * Restituisce un singolo posto per id (per la pagina dettaglio).
-   */
+  // --- NUOVO: dettaglio posto ---
+
   getPlaceById(id: number): Place | undefined {
     return this.placesSignal().find((p) => p.id === id);
   }

@@ -16,7 +16,9 @@ export class PlaceCardComponent {
 
   constructor(private placeService: PlaceService) {}
 
-  toggleFavorite() {
+  toggleFavorite(event?: MouseEvent) {
+    // per evitare che il click sulla stellina segua il link
+    event?.preventDefault();
     this.placeService.toggleFavorite(this.place.id);
   }
 }

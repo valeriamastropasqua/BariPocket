@@ -1,24 +1,47 @@
-<div *ngIf="place; else notFound" class="detail">
-  <a routerLink="/">← Torna alla lista</a>
+<div class="page" *ngIf="place as p">
+  <nav class="breadcrumb">
+    <a routerLink="/">← Torna alla lista</a>
+  </nav>
 
-  <h1>{{ place.name }}</h1>
-  <p class="meta">
-    {{ place.category }} • {{ place.neighborhood }}
-    <span *ngIf="priceLabel"> • {{ priceLabel }}</span>
-  </p>
+  <header class="header">
+    <div class="title-block">
+      <p class="meta">
+        {{ p.category }} • {{ p.neighborhood }}
+      </p>
+      <h1>{{ p.name }}</h1>
+    </div>
 
-  <p class="long">
-    {{ place.longDescription }}
-  </p>
+    <button
+      class="fav-btn"
+      type="button"
+      (click)="toggleFavorite()"
+      [attr.aria-label]="p.favorite ? 'Rimuovi dai preferiti' : 'Aggiungi ai preferiti'"
+    >
+      {{ p.favorite ? '★' : '☆' }}
+    </button>
+  </header>
 
-  <p *ngIf="place.address"><strong>Indirizzo:</strong> {{ place.address }}</p>
+  <section class="body">
+    <p class="lead">
+      {{ p.longDescription || p.description }}
+    </p>
 
-  <p *ngIf="place.instagramHandle">
-    <strong>Instagram:</strong> {{ place.instagramHandle }}
-  </p>
+    <div class="meta-box">
+      <p *ngIf="p.address">
+        <strong>Indirizzo:</strong> {{ p.address }}
+      </p>
+
+      <p *ngIf="p.instagramHandle">
+        <strong>Instagram:</strong> {{ p.instagramHandle }}
+      </p>
+
+      <p *ngIf="priceLabel">
+        <strong>Fascia prezzo:</strong> {{ priceLabel }}
+      </p>
+    </div>
+
+    <div class="tags" *ngIf="p.tags?.length">
+      <span *ngFor="let tag of p.tags">#{{ tag }}</span>
+    </div>
+  </section>
 </div>
-
-<ng-template #notFound>
-  <p>Posto non trovato 😢</p>
-  <a routerLink="/">Torna alla home</a>
-</ng-template>

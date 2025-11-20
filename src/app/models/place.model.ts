@@ -14,16 +14,13 @@ export interface Place {
   neighborhood: string;
 
   shortDescription: string;
-  description: string;
-  longDescription?: string;
+  description: string;     // descrizione “media”
+  longDescription: string; // descrizione più lunga per la pagina dettaglio
 
   tags?: string[];
-
   instagramHandle?: string;
-  avgPriceLevel?: number; // 1, 2, 3...
-
   address?: string;
+  avgPriceLevel?: 1 | 2 | 3 | 4;
 
-  // campo usato ovunque per la stellina
-  favorite?: boolean;
+  favorite?: boolean;        // usata per la stellina
 }
