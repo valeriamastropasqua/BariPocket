@@ -14,13 +14,21 @@ export interface Place {
   neighborhood: string;
 
   shortDescription: string;
-  description: string;     // descrizione “media”
-  longDescription: string; // descrizione più lunga per la pagina dettaglio
+  longDescription?: string;
+  description?: string;
 
   tags?: string[];
-  instagramHandle?: string;
-  address?: string;
-  avgPriceLevel?: 1 | 2 | 3 | 4;
 
-  favorite?: boolean;        // usata per la stellina
+  instagramHandle?: string;
+  googleMapsUrl?: string;
+  avgPriceLevel?: 0 | 1 | 2 | 3;
+
+  // preferiti
+  favorite?: boolean;
+
+  // campi calcolati da PlaceService
+  avgRating?: number;
+  reviewsCount?: number;
+  womenSafeScore?: number | undefined;
+  badges?: string[];
 }

@@ -1,47 +1,156 @@
+<!-- src/app/pages/place-detail/place-detail.component.html -->
 <div class="page" *ngIf="place as p">
-  <nav class="breadcrumb">
-    <a routerLink="/">← Torna alla lista</a>
+  <!-- BREADCRUMB + NAV SECONDARIA -->
+  <nav class="subnav">
+    <a routerLink="/" class="subnav-link">Tutti i posti</a>
+    <span>·</span>
+    <a routerLink="/favorites" class="subnav-link">Solo preferiti</a>
   </nav>
 
+  <!-- HEADER -->
   <header class="header">
-    <div class="title-block">
+    <div class="header-left">
+      <p class="breadcrumb">
+        <span>Bari</span>
+        <span>·</span>
+        <span>Local tips</span>
+        <span>·</span>
+        <span class="breadcrumb-current">{{ p.name }}</span>
+      </p>
+
+      <h1 class="title">{{ p.name }}</h1>
       <p class="meta">
         {{ p.category }} • {{ p.neighborhood }}
       </p>
-      <h1>{{ p.name }}</h1>
+
+      <p class="meta" *ngIf="p.avgRating">
+        ⭐ {{ p.avgRating }} ·
+        <span>{{ p.reviewsCount }} recensioni</span>
+      </p>
+
+      <p class="meta meta-safe" *ngIf="womenSafeLabel">
+        <span class="safe-dot">●</span>
+        {{ womenSafeLabel }}
+      </p>
     </div>
 
-    <button
-      class="fav-btn"
-      type="button"
-      (click)="toggleFavorite()"
-      [attr.aria-label]="p.favorite ? 'Rimuovi dai preferiti' : 'Aggiungi ai preferiti'"
-    >
-      {{ p.favorite ? '★' : '☆' }}
-    </button>
+    <div class="header-right">
+      <button
+        class="fav-btn"
+        type="button"
+        (click)="onToggleFavorite()"
+        [attr.aria-pressed]="p.favorite"
+      >
+        <span class="star">{{ p.favorite ? '★' : '☆' }}</span>
+        <span>{{ p.favorite ? 'Salvato' : 'Salva' }}</span>
+      </button>
+    </div>
   </header>
 
-  <section class="body">
-    <p class="lead">
-      {{ p.longDescription || p.description }}
-    </p>
+  <!-- CONTENUTO PRINCIPALE -->
+  <main class="content">
+    <section class="section">
+      <h2>Perché andarci</h2>
+      <p>{{ p.longDescription || p.shortDescription }}</p>
+    </section>
 
-    <div class="meta-box">
-      <p *ngIf="p.address">
-        <strong>Indirizzo:</strong> {{ p.address }}
+    <section class="section" *ngIf="p.googleMapsUrl">
+      <h3>Mappa</h3>
+      <a
+        class="maps-link"
+        [href]="p.googleMapsUrl"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        Apri su Google Maps
+      </a>
+    </section>
+
+    <!-- FORM RECENSIONE -->
+    <section class="section">
+      <h2>Lascia una recensione</h2>
+
+      <div class="review-form">
+        <label class="field">
+          <span>Voto</span>
+          <select [(ngModel)]="reviewForm.rating" name="rating">
+            <option [ngValue]="5">5 – Fantastico</option>
+            <option [ngValue]="4">4 – Molto buono</option>
+            <option [ngValue]="3">3 – Nella media</option>
+            <option [ngValue]="2">2 – Così così</option>
+            <option [ngValue]="1">1 – Da evitare</option>
+          </select>
+        </label>
+
+        <label class="field field-grow">
+          <span>Commento (opzionale)</span>
+          <textarea
+            [(ngModel)]="reviewForm.comment"
+            name="comment"
+            rows="2"
+            placeholder="Racconta com'è andata..."
+          ></textarea>
+        </label>
+
+        <div class="field field-inline">
+          <label>
+            <input
+              type="checkbox"
+              [(ngModel)]="reviewForm.isWoman"
+              name="isWoman"
+            />
+            Sono una donna
+          </label>
+
+          <label *ngIf="reviewForm.isWoman">
+            <input
+              type="checkbox"
+              [(ngModel)]="reviewForm.feltSafe"
+              name="feltSafe"
+            />
+            Mi sono sentita al sicuro qui
+          </label>
+        </div>
+
+        <button type="button" class="submit-btn" (click)="submitReview()">
+          Invia recensione
+        </button>
+      </div>
+    </section>
+
+    <!-- LISTA RECENSIONI -->
+    <section class="section">
+      <h2>Recensioni</h2>
+
+      <p class="empty" *ngIf="reviews.length === 0">
+        Nessuna recensione ancora. Scrivine una! ✨
       </p>
 
-      <p *ngIf="p.instagramHandle">
-        <strong>Instagram:</strong> {{ p.instagramHandle }}
-      </p>
+      <ul class="review-list" *ngIf="reviews.length > 0">
+        <li class="review-item" *ngFor="let r of reviews">
+          <div class="review-header">
+            <span class="review-rating">
+              <ng-container *ngFor="let _ of [].constructor(r.rating)">
+                ★
+              </ng-container>
+            </span>
+            <span class="review-meta">
+              {{ r.createdAt | date : 'shortDate' }}
+              <span *ngIf="r.isWoman">
+                · recensione da una donna
+                <span *ngIf="r.feltSafe"> (si è sentita al sicuro)</span>
+                <span *ngIf="r.feltSafe === false">
+                  (non si è sentita al sicuro)
+                </span>
+              </span>
+            </span>
+          </div>
 
-      <p *ngIf="priceLabel">
-        <strong>Fascia prezzo:</strong> {{ priceLabel }}
-      </p>
-    </div>
-
-    <div class="tags" *ngIf="p.tags?.length">
-      <span *ngFor="let tag of p.tags">#{{ tag }}</span>
-    </div>
-  </section>
+          <p class="review-comment" *ngIf="r.comment">
+            {{ r.comment }}
+          </p>
+        </li>
+      </ul>
+    </section>
+  </main>
 </div>

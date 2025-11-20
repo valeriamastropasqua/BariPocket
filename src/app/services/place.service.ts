@@ -1,40 +1,44 @@
 // src/app/services/place.service.ts
-import { Injectable, computed, signal } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
+import { Place } from '../models/place.model';
 import { MOCK_PLACES } from '../data/mock-places';
-import { Place, PlaceCategory } from '../models/place.model';
+import { ReviewService } from './review.service';
 
 @Injectable({ providedIn: 'root' })
 export class PlaceService {
-  private placesSignal = signal<Place[]>(MOCK_PLACES);
+  private _places = signal<Place[]>(MOCK_PLACES);
+  places = this._places.asReadonly();
 
-  // Se ti serve in futuro come stream globale
-  places = computed(() => this.placesSignal());
+  constructor(private reviewService: ReviewService) {}
 
-  getPlaces(
-    category?: PlaceCategory,
-    search: string = ''
-  ): Place[] {
-    const term = search.trim().toLowerCase();
+  /** Lista filtrata + campi calcolati */
+  getPlaces(category?: string, search?: string): Place[] {
+    let base = this._places();
 
-    return this.placesSignal().filter((p) => {
-      if (category && p.category !== category) return false;
+    if (category) {
+      base = base.filter((p) => p.category === category);
+    }
 
-      if (!term) return true;
+    if (search) {
+      const q = search.toLowerCase();
+      base = base.filter(
+        (p) =>
+          p.name.toLowerCase().includes(q) ||
+          p.neighborhood.toLowerCase().includes(q) ||
+          p.tags?.some((t) => t.toLowerCase().includes(q))
+      );
+    }
 
-      const inText =
-        p.name.toLowerCase().includes(term) ||
-        p.neighborhood.toLowerCase().includes(term) ||
-        p.description.toLowerCase().includes(term) ||
-        p.tags?.some((t) => t.toLowerCase().includes(term));
-
-      return inText;
-    });
+    return base.map((p) => this.withAggregates(p));
   }
 
-  // --- Preferiti (già sfrutti la proprietà .favorite sugli oggetti) ---
+  getById(id: number): Place | undefined {
+    const found = this._places().find((p) => p.id === id);
+    return found ? this.withAggregates(found) : undefined;
+  }
 
   toggleFavorite(id: number): void {
-    this.placesSignal.update((list) =>
+    this._places.update((list) =>
       list.map((p) =>
         p.id === id ? { ...p, favorite: !p.favorite } : p
       )
@@ -42,12 +46,48 @@ export class PlaceService {
   }
 
   getFavorites(): Place[] {
-    return this.placesSignal().filter((p) => p.favorite);
+    return this.getPlaces().filter((p) => p.favorite);
   }
 
-  // --- NUOVO: dettaglio posto ---
+  /** Aggiunge avgRating, reviewsCount, womenSafeScore, badges */
+  private withAggregates(p: Place): Place {
+    const reviews = this.reviewService.getByPlace(p.id);
+    if (reviews.length === 0) {
+      return {
+        ...p,
+        reviewsCount: 0,
+        avgRating: undefined,
+        womenSafeScore: undefined,
+      };
+    }
 
-  getPlaceById(id: number): Place | undefined {
-    return this.placesSignal().find((p) => p.id === id);
+    const avgRating =
+      reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length;
+
+    const women = reviews.filter((r) => r.isWoman);
+    const safeWomen = women.filter((r) => r.feltSafe);
+
+    const womenSafeScore =
+      women.length === 0 ? undefined : safeWomen.length / women.length;
+
+    const badges = new Set(p.badges ?? []);
+
+    if (avgRating >= 4.7 && reviews.length >= 5) {
+      badges.add('hiddenGem');
+    }
+    if (womenSafeScore !== undefined && womenSafeScore >= 0.8 && women.length >= 5) {
+      badges.add('womenSafe');
+    }
+    if (p.avgPriceLevel !== undefined && p.avgPriceLevel <= 1) {
+      badges.add('budgetFriendly');
+    }
+
+    return {
+      ...p,
+      avgRating: Number(avgRating.toFixed(1)),
+      reviewsCount: reviews.length,
+      womenSafeScore,
+      badges: Array.from(badges),
+    };
   }
 }
