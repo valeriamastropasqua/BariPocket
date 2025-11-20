@@ -1,0 +1,17 @@
+<div class="container">
+  <header class="header">
+    <h1>I tuoi preferiti</h1>
+    <p>I posti di Bari che ami di più.</p>
+  </header>
+
+  <section *ngIf="favorites.length; else empty">
+    <app-place-card
+      *ngFor="let place of favorites"
+      [place]="place"
+    ></app-place-card>
+  </section>
+
+  <ng-template #empty>
+    <p>Non hai ancora aggiunto nulla ai preferiti.</p>
+  </ng-template>
+</div>

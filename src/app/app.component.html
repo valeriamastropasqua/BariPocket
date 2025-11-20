@@ -1,0 +1,101 @@
+<div class="page">
+  <header class="hero">
+    <h1 class="hero-title">Bari Local Insider</h1>
+    <p class="hero-subtitle">
+      Posti veri, consigliati da chi Bari la vive ogni giorno.
+    </p>
+
+    <div class="search-wrapper">
+      <input
+        type="text"
+        [(ngModel)]="searchTerm"
+        (input)="onSearchChange()"
+        placeholder="Cerca per nome, zona o hashtag..."
+        class="search-input"
+      />
+    </div>
+
+    <div class="chips">
+      <button
+        class="chip"
+        [class.chip--active]="selectedCategory === 'all'"
+        (click)="filterByCategory('all')"
+      >
+        Tutti
+      </button>
+      <button
+        class="chip"
+        [class.chip--active]="selectedCategory === 'cibo'"
+        (click)="filterByCategory('cibo')"
+      >
+        Cibo
+      </button>
+      <button
+        class="chip"
+        [class.chip--active]="selectedCategory === 'caffè'"
+        (click)="filterByCategory('caffè')"
+      >
+        Caffè & Studio
+      </button>
+      <button
+        class="chip"
+        [class.chip--active]="selectedCategory === 'mare'"
+        (click)="filterByCategory('mare')"
+      >
+        Mare
+      </button>
+      <button
+        class="chip"
+        [class.chip--active]="selectedCategory === 'cultura'"
+        (click)="filterByCategory('cultura')"
+      >
+        Cultura
+      </button>
+      <button
+        class="chip"
+        [class.chip--active]="selectedCategory === 'nightlife'"
+        (click)="filterByCategory('nightlife')"
+      >
+        Nightlife
+      </button>
+    </div>
+  </header>
+
+  <main class="content">
+    <section class="cards-grid">
+      <article class="place-card" *ngFor="let place of filteredPlaces">
+        <div class="place-header">
+          <h2 class="place-title">{{ place.name }}</h2>
+          <button
+            class="favorite-btn"
+            (click)="toggleFavorite(place)"
+            [attr.aria-pressed]="place.favorite"
+          >
+            ★
+          </button>
+        </div>
+
+        <p class="place-area">{{ place.area }} • {{ place.categoryLabel }}</p>
+
+        <p class="place-description">
+          {{ place.shortDescription }}
+        </p>
+
+        <p class="place-tags">
+          <span *ngFor="let tag of place.tags">#{{ tag }}</span>
+        </p>
+
+        <div class="place-actions">
+          <a class="link" (click)="openDetails(place)">Vedi dettagli</a>
+          <a class="link secondary" (click)="openMaps(place)">
+            Apri su Maps
+          </a>
+        </div>
+      </article>
+
+      <p *ngIf="filteredPlaces.length === 0" class="empty-state">
+        Nessun posto trovato. Prova a cambiare ricerca o categoria ✨
+      </p>
+    </section>
+  </main>
+</div>

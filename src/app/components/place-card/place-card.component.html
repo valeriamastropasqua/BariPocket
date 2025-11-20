@@ -1,0 +1,20 @@
+<a class="card" [routerLink]="['/place', place.id]">
+  <div class="card-header">
+    <h2>{{ place.name }}</h2>
+    <button
+      class="fav-btn"
+      (click)="toggleFavorite($event)"
+      [attr.aria-label]="place.isFavorite ? 'Rimuovi dai preferiti' : 'Aggiungi ai preferiti'"
+    >
+      {{ place.isFavorite ? '★' : '☆' }}
+    </button>
+  </div>
+
+  <p class="category">{{ place.category }} • {{ place.neighborhood }}</p>
+
+  <p class="short">{{ place.shortDescription }}</p>
+
+  <div class="tags" *ngIf="place.tags?.length">
+    <span *ngFor="let t of place.tags">#{{ t }}</span>
+  </div>
+</a>

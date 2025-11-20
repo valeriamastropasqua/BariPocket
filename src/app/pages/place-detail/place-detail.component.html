@@ -1,0 +1,24 @@
+<div *ngIf="place; else notFound" class="detail">
+  <a routerLink="/">← Torna alla lista</a>
+
+  <h1>{{ place.name }}</h1>
+  <p class="meta">
+    {{ place.category }} • {{ place.neighborhood }}
+    <span *ngIf="priceLabel"> • {{ priceLabel }}</span>
+  </p>
+
+  <p class="long">
+    {{ place.longDescription }}
+  </p>
+
+  <p *ngIf="place.address"><strong>Indirizzo:</strong> {{ place.address }}</p>
+
+  <p *ngIf="place.instagramHandle">
+    <strong>Instagram:</strong> {{ place.instagramHandle }}
+  </p>
+</div>
+
+<ng-template #notFound>
+  <p>Posto non trovato 😢</p>
+  <a routerLink="/">Torna alla home</a>
+</ng-template>

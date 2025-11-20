@@ -1,0 +1,36 @@
+<div class="container">
+  <header class="header">
+    <h1>Bari Local Insider</h1>
+    <p>Posti veri, consigliati da chi Bari la vive ogni giorno.</p>
+  </header>
+
+  <section class="filters">
+    <input
+      type="text"
+      placeholder="Cerca per nome, zona o tag (es. tramonto, focaccia)..."
+      [ngModel]="search()"
+      (ngModelChange)="onSearchChange($event)"
+    />
+
+    <div class="chips">
+      <button
+        *ngFor="let c of categories"
+        (click)="onCategoryChange(c.key)"
+        [class.active]="selectedCategory() === c.key || (!c.key && !selectedCategory())"
+      >
+        {{ c.label }}
+      </button>
+    </div>
+  </section>
+
+  <section class="list" *ngIf="places().length; else empty">
+    <app-place-card
+      *ngFor="let place of places()"
+      [place]="place"
+    ></app-place-card>
+  </section>
+
+  <ng-template #empty>
+    <p>Nessun posto trovato con questi filtri 😢</p>
+  </ng-template>
+</div>

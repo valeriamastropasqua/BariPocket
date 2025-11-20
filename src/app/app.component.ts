@@ -6,12 +6,21 @@ import { RouterOutlet } from '@angular/router';
   standalone: true,
   imports: [RouterOutlet],
   template: `
-    <h1>Welcome to {{title}}!</h1>
+    <div class="app-shell">
+      <header class="app-header">
+        <div class="app-logo">bari-local</div>
+        <div class="app-subtitle">Consigli veri da chi Bari la vive ogni giorno</div>
+      </header>
 
-    <router-outlet />
+      <main class="app-main">
+        <router-outlet></router-outlet>
+      </main>
+
+      <footer class="app-footer">
+        <span>Made with ❤️ in Bari</span>
+      </footer>
+    </div>
   `,
-  styles: [],
+  styleUrls: ['./app.component.css'],
 })
-export class AppComponent {
-  title = 'bari-local';
-}
+export class AppComponent {}
