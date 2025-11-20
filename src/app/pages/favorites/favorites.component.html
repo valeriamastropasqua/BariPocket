@@ -4,9 +4,9 @@
     <p>I posti di Bari che ami di più.</p>
   </header>
 
-  <section *ngIf="favorites.length; else empty">
+  <section *ngIf="$any(favorites)?.length; else empty">
     <app-place-card
-      *ngFor="let place of favorites"
+      *ngFor="let place of $any(favorites)"
       [place]="place"
     ></app-place-card>
   </section>

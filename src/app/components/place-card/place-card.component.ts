@@ -1,23 +1,22 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterLink } from '@angular/router';
 import { Place } from '../../models/place.model';
 import { PlaceService } from '../../services/place.service';
 
 @Component({
   selector: 'app-place-card',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterLink],
   templateUrl: './place-card.component.html',
+  styleUrls: ['./place-card.component.css'],
 })
 export class PlaceCardComponent {
   @Input() place!: Place;
 
   constructor(private placeService: PlaceService) {}
 
-  toggleFavorite(event: MouseEvent) {
-    event.stopPropagation();
-    event.preventDefault();
+  toggleFavorite() {
     this.placeService.toggleFavorite(this.place.id);
   }
 }

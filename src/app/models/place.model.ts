@@ -1,24 +1,29 @@
+// src/app/models/place.model.ts
 export type PlaceCategory =
   | 'food'
   | 'coffee'
-  | 'beach'
   | 'view'
+  | 'beach'
   | 'culture'
-  | 'nightlife'
-  | 'other';
+  | 'nightlife';
 
 export interface Place {
   id: number;
   name: string;
   category: PlaceCategory;
-  neighborhood: string; // es. "Madonnella", "Poggiofranco"
+  neighborhood: string;
+
   shortDescription: string;
-  longDescription: string;
+  description: string;
+  longDescription?: string;
+
+  tags?: string[];
+
   instagramHandle?: string;
+  avgPriceLevel?: number; // 1, 2, 3...
+
   address?: string;
-  lat?: number;
-  lng?: number;
-  avgPriceLevel?: 1 | 2 | 3 | 4; // € - €€€€
-  tags: string[];                // es. ["tramonto", "foto", "aperitivo"]
-  isFavorite?: boolean;
+
+  // campo usato ovunque per la stellina
+  favorite?: boolean;
 }

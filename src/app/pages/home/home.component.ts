@@ -10,8 +10,10 @@ import { PlaceCardComponent } from '../../components/place-card/place-card.compo
   standalone: true,
   imports: [CommonModule, FormsModule, PlaceCardComponent],
   templateUrl: './home.component.html',
+  styleUrls: ['./home.component.css'],
 })
 export class HomeComponent {
+  // categorie per la navbar
   categories: { key?: PlaceCategory; label: string }[] = [
     { label: 'Tutti' },
     { key: 'food', label: 'Cibo' },
@@ -24,13 +26,18 @@ export class HomeComponent {
 
   selectedCategory = signal<PlaceCategory | undefined>(undefined);
   search = signal<string>('');
+  showOnlyFavorites = signal(false);
 
-  places = computed<Place[]>(() =>
-    this.placeService.getPlaces(
+  places = computed<Place[]>(() => {
+    const base = this.placeService.getPlaces(
       this.selectedCategory(),
       this.search()
-    )
-  );
+    );
+
+    return this.showOnlyFavorites()
+      ? base.filter((p) => p.favorite)
+      : base;
+  });
 
   constructor(private placeService: PlaceService) {}
 
@@ -40,5 +47,9 @@ export class HomeComponent {
 
   onSearchChange(value: string) {
     this.search.set(value);
+  }
+
+  toggleShowFavorites() {
+    this.showOnlyFavorites.update((v) => !v);
   }
 }

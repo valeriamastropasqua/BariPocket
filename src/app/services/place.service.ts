@@ -1,48 +1,61 @@
-import { MOCK_PLACES } from './../data/mock-paces';
-import { Injectable, signal, computed } from '@angular/core';
+// src/app/services/place.service.ts
+import { Injectable, signal } from '@angular/core';
 import { Place, PlaceCategory } from '../models/place.model';
+import { MOCK_PLACES } from '../data/mock-places';
 
 @Injectable({
   providedIn: 'root',
 })
 export class PlaceService {
+  // stato centrale della lista
   private placesSignal = signal<Place[]>(MOCK_PLACES);
 
-  places = computed(() => this.placesSignal());
+  /**
+   * Restituisce i posti filtrati per categoria e query di ricerca.
+   */
+  getPlaces(category?: PlaceCategory, query: string = ''): Place[] {
+    const q = query.trim().toLowerCase();
 
-  getPlaces(category?: PlaceCategory, search?: string): Place[] {
-    let result = this.placesSignal();
+    return this.placesSignal().filter((p) => {
+      const matchCategory = category ? p.category === category : true;
 
-    if (category) {
-      result = result.filter((p) => p.category === category);
-    }
+      const haystack = [
+        p.name,
+        p.neighborhood,
+        p.description,
+        ...(p.tags ?? []),
+      ]
+        .join(' ')
+        .toLowerCase();
 
-    if (search && search.trim()) {
-      const q = search.toLowerCase();
-      result = result.filter(
-        (p) =>
-          p.name.toLowerCase().includes(q) ||
-          p.shortDescription.toLowerCase().includes(q) ||
-          p.tags.some((t) => t.toLowerCase().includes(q)) ||
-          p.neighborhood.toLowerCase().includes(q)
-      );
-    }
+      const matchQuery = q ? haystack.includes(q) : true;
 
-    return result;
+      return matchCategory && matchQuery;
+    });
   }
 
+  /**
+   * Inverte lo stato "favorite" di un posto.
+   */
+  toggleFavorite(id: number): void {
+    this.placesSignal.update((list) =>
+      list.map((p) =>
+        p.id === id ? { ...p, favorite: !p.favorite } : p
+      )
+    );
+  }
+
+  /**
+   * Tutti i posti marcati come preferiti.
+   */
+  getFavorites(): Place[] {
+    return this.placesSignal().filter((p) => p.favorite);
+  }
+
+  /**
+   * Restituisce un singolo posto per id (per la pagina dettaglio).
+   */
   getPlaceById(id: number): Place | undefined {
     return this.placesSignal().find((p) => p.id === id);
-  }
-
-  toggleFavorite(id: number): void {
-    const updated = this.placesSignal().map((p) =>
-      p.id === id ? { ...p, isFavorite: !p.isFavorite } : p
-    );
-    this.placesSignal.set(updated);
-  }
-
-  getFavorites(): Place[] {
-    return this.placesSignal().filter((p) => p.isFavorite);
   }
 }
